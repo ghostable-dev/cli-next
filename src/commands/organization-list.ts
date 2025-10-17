@@ -10,8 +10,7 @@ export function registerOrganizationListCommand(program: Command) {
 		.aliases(['orgs:list', 'organizations:list', 'organization:list'])
 		.description('List the organizations that you belong to.')
 		.action(async () => {
-			// Load session / token
-			const sessionSvc = new SessionService();
+                        const sessionSvc = new SessionService();
 			const sess = await sessionSvc.load();
 			if (!sess?.accessToken) {
 				log.error('❌ Not authenticated. Run `ghostable login`.');
@@ -19,10 +18,9 @@ export function registerOrganizationListCommand(program: Command) {
 			}
 			const currentOrgId = sess.organizationId;
 
-			// Fetch orgs
-			const client = GhostableClient.unauthenticated(config.apiBase).withToken(
-				sess.accessToken,
-			);
+                        const client = GhostableClient.unauthenticated(config.apiBase).withToken(
+                                sess.accessToken,
+                        );
 			const orgs = (await client.organizations()).sort((a, b) =>
 				(a.name ?? '').localeCompare(b.name ?? ''),
 			);
@@ -32,14 +30,12 @@ export function registerOrganizationListCommand(program: Command) {
 				return;
 			}
 
-			// Render table
-			const rows = orgs.map((o) => ({
+                        const rows = orgs.map((o) => ({
 				ID: o.id,
 				Name: o.name ?? '',
 				Current: o.id === currentOrgId ? '✅' : '',
 			}));
 
-			// Use native console.table for a lightweight table
-			console.table(rows);
+                        console.table(rows);
 		});
 }

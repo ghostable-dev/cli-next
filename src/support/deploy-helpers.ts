@@ -122,9 +122,8 @@ export async function decryptBundle(
 	const secrets: DecryptedSecret[] = [];
 	const warnings: string[] = [];
 
-	// reuse encoders
-	const encoder = new TextEncoder();
-	const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
 
 	for (const entry of bundle.secrets) {
 		const scope = scopeFromAAD(entry.aad);

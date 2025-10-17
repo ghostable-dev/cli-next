@@ -18,8 +18,7 @@ export function registerKeySetCommand(program: Command) {
 						'Expected format: base64:...',
 				});
 
-				// Store; helper normalizes to "b64:" internally
-				await setMasterSeed(raw.trim());
+                                await setMasterSeed(raw.trim());
 
 				log.line();
 				log.ok('✅ Master seed updated.');

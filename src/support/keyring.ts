@@ -11,8 +11,7 @@ function argvHasToken(argv: string[]): boolean {
 }
 
 function isDeployCommand(argv: string[]): boolean {
-	// naive but reliable enough for Commander-style CLIs
-	return argv.some((a) => DEPLOY_COMMANDS.has(a));
+        return argv.some((a) => DEPLOY_COMMANDS.has(a));
 }
 
 /**
@@ -31,7 +30,7 @@ export async function loadKeytar(argv: string[] = process.argv.slice(2)): Promis
 	try {
 		const mod = await import('keytar');
 		return (mod.default ?? mod) as Keytar;
-	} catch {
-		return null; // missing native lib or not installed: treat as unavailable
-	}
+        } catch {
+                return null;
+        }
 }

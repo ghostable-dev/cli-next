@@ -17,13 +17,12 @@ export function registerKeyExportCommand(program: Command) {
 			'Export the derived key for a specific environment (instead of the master seed)',
 		)
 		.action(async (opts: { env?: string }) => {
-			// If --env is not provided, export the master seed
-			if (!opts.env) {
-				try {
-					const { masterSeedB64 } = await loadOrCreateKeys();
-					log.line();
-					log.text(chalk.bold.cyan('🔑  Master seed'));
-					log.ok(masterSeedB64); // already prefixed with b64:
+                        if (!opts.env) {
+                                try {
+                                        const { masterSeedB64 } = await loadOrCreateKeys();
+                                        log.line();
+                                        log.text(chalk.bold.cyan('🔑  Master seed'));
+                                        log.ok(masterSeedB64);
 					log.line();
 					log.text(
 						chalk.dim(
@@ -38,9 +37,7 @@ export function registerKeyExportCommand(program: Command) {
 				}
 			}
 
-			// Else: export the per-environment encryption key derived from the seed
-			// 1) Read manifest (project + envs) so we can scope correctly
-			let projectId: string, envNames: string[];
+                        let projectId: string, envNames: string[];
 			try {
 				projectId = Manifest.id();
 				envNames = Manifest.environmentNames();
@@ -54,26 +51,23 @@ export function registerKeyExportCommand(program: Command) {
 				process.exit(1);
 			}
 
-			// 2) Pick env (flag → prompt)
-			const envName =
-				opts.env && envNames.includes(opts.env)
-					? opts.env
+                        const envName =
+                                opts.env && envNames.includes(opts.env)
+                                        ? opts.env
 					: await select<string>({
 							message: 'Which environment key would you like to export?',
 							choices: envNames.sort().map((n) => ({ name: n, value: n })),
 						});
 
-			// 3) Get org from session (needed to build the derivation scope)
-			const sess = await new SessionService().load();
-			const orgId = sess?.organizationId;
+                        const sess = await new SessionService().load();
+                        const orgId = sess?.organizationId;
 			if (!orgId) {
 				log.error('❌ No organization linked. Run `ghostable login` first.');
 				process.exit(1);
 			}
 
-			// 4) Derive the per-env key and print it
-			try {
-				const { masterSeedB64 } = await loadOrCreateKeys();
+                        try {
+                                const { masterSeedB64 } = await loadOrCreateKeys();
 				const masterSeed = Buffer.from(masterSeedB64.replace(/^b64:/, ''), 'base64');
 				const scope = `${orgId}/${projectId}/${envName}`;
 				const { encKey } = deriveKeys(masterSeed, scope);

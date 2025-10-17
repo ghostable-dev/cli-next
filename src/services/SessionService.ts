@@ -4,8 +4,8 @@ import { loadKeytar } from '../support/keyring.js';
 
 export class SessionService {
 	async load(): Promise<Session | null> {
-		const keytar = await loadKeytar();
-		if (!keytar) return null; // in deploy/token mode, no session
+                const keytar = await loadKeytar();
+                if (!keytar) return null;
 		const raw = await keytar.getPassword(config.keychainService, config.keychainAccount);
 		return raw ? (JSON.parse(raw) as Session) : null;
 	}
@@ -25,8 +25,8 @@ export class SessionService {
 	}
 
 	async clear(): Promise<void> {
-		const keytar = await loadKeytar();
-		if (!keytar) return; // noop in deploy contexts
+                const keytar = await loadKeytar();
+                if (!keytar) return;
 		await keytar.deletePassword(config.keychainService, config.keychainAccount);
 	}
 }

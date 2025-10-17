@@ -100,9 +100,8 @@ export class Manifest {
 				`Unable to find a Ghostable manifest at [${file}].\n→ Run 'ghostable init' to generate a new manifest file.`,
 			);
 		}
-		const m = readYaml(file);
-		// normalize environments
-		const envs = normalizeEnvs(m.environments);
+                const m = readYaml(file);
+                const envs = normalizeEnvs(m.environments);
 		return { ...m, environments: envs };
 	}
 
@@ -160,11 +159,10 @@ export class Manifest {
 	): void {
 		const m = this.current(file);
 		const envs = normalizeEnvs(m.environments);
-		envs[environment.name] = environment.type ? { type: environment.type } : {};
-		// sort by key
-		const sorted = Object.fromEntries(
-			Object.entries(envs).sort(([a], [b]) => a.localeCompare(b)),
-		);
+                envs[environment.name] = environment.type ? { type: environment.type } : {};
+                const sorted = Object.fromEntries(
+                        Object.entries(envs).sort(([a], [b]) => a.localeCompare(b)),
+                );
 		writeYaml(file, { ...m, environments: sorted });
 	}
 
@@ -184,8 +182,7 @@ export class Manifest {
 
 	/** Overwrite manifest (advanced use) */
 	static write(manifest: ManifestShape, file = resolveManifestPath()): void {
-		// ensure environments normalized and sorted
-		const envs = normalizeEnvs(manifest.environments);
+                const envs = normalizeEnvs(manifest.environments);
 		const sorted = Object.fromEntries(
 			Object.entries(envs).sort(([a], [b]) => a.localeCompare(b)),
 		);

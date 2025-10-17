@@ -9,19 +9,16 @@ const program = new Command();
 program.name('ghostable').description('Ghostable zero-knowledge CLI (experimental)');
 await registerAllCommands(program);
 
-// Helpful defaults
 program.showHelpAfterError();
 program.configureOutput({
-	outputError: (str) => process.stderr.write(chalk.red(str)),
+        outputError: (str) => process.stderr.write(chalk.red(str)),
 });
 
-// If user runs bare `ghostable`, show help
 if (process.argv.length <= 2) {
-	program.outputHelp();
+        program.outputHelp();
 }
 
 program.parseAsync(process.argv).catch((err) => {
-	// Catch any import-time or action-time errors so they don’t crash silently
-	log.error(err?.stack || String(err));
-	process.exit(1);
+        log.error(err?.stack || String(err));
+        process.exit(1);
 });

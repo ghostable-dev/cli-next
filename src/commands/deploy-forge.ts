@@ -44,8 +44,7 @@ export function registerDeployForgeCommand(program: Command) {
 					process.exit(1);
 				}
 
-				// 1) Token + client
-				let token: string;
+                                let token: string;
 				try {
 					token = await resolveToken(opts.token, { allowSession: false });
 				} catch (error) {
@@ -54,8 +53,7 @@ export function registerDeployForgeCommand(program: Command) {
 				}
 				const client = createGhostableClient(token);
 
-				// 2) Fetch bundle for this env (derived from token)
-				const deploySpin = ora('Fetching environment secret bundle…').start();
+                                const deploySpin = ora('Fetching environment secret bundle…').start();
 				let bundle: EnvironmentSecretBundle;
 				try {
 					bundle = await client.deploy({
@@ -75,17 +73,15 @@ export function registerDeployForgeCommand(program: Command) {
 					return;
 				}
 
-				// 3) Decrypt + merge (child wins)
-				const { secrets, warnings } = await decryptBundle(bundle, {
-					masterSeedB64,
-				});
+                                const { secrets, warnings } = await decryptBundle(bundle, {
+                                        masterSeedB64,
+                                });
 				for (const warning of warnings) log.warn(`⚠️ ${warning}`);
 
 				const merged: Record<string, string> = {};
 				for (const s of secrets) merged[s.entry.name] = s.value;
 
-				// 4) Write .env in working directory (Forge flow expects plain .env here)
-				const workDir = resolveWorkDir();
+                                const workDir = resolveWorkDir();
 				const envPath = path.resolve(workDir, '.env');
 				const previousMeta = readEnvFileSafeWithMetadata(envPath);
 				const previous = previousMeta.vars;
@@ -95,10 +91,9 @@ export function registerDeployForgeCommand(program: Command) {
 				writeEnvFile(envPath, combined, { preserve: preserved });
 				log.ok(`✅ Wrote ${Object.keys(merged).length} keys → ${envPath}`);
 
-				// 5) If --encrypted, generate base64 key, run php artisan env:encrypt, and persist key in .env
-				if (opts.encrypted) {
-					if (!artisan.exists()) {
-						log.error('❌ php or artisan not found. Run inside a Laravel project.');
+                                if (opts.encrypted) {
+                                        if (!artisan.exists()) {
+                                                log.error('❌ php or artisan not found. Run inside a Laravel project.');
 						process.exit(1);
 					}
 
@@ -107,13 +102,11 @@ export function registerDeployForgeCommand(program: Command) {
 
 					const envKeyB64 = `base64:${b64(randomBytes(32))}`;
 
-					// ensure key is present in the plain .env file
-					combined['LARAVEL_ENV_ENCRYPTION_KEY'] = envKeyB64;
-					writeEnvFile(envPath, combined, { preserve: preserved });
-					log.ok(`🔑 Set LARAVEL_ENV_ENCRYPTION_KEY in ${path.basename(envPath)}`);
+                                        combined['LARAVEL_ENV_ENCRYPTION_KEY'] = envKeyB64;
+                                        writeEnvFile(envPath, combined, { preserve: preserved });
+                                        log.ok(`🔑 Set LARAVEL_ENV_ENCRYPTION_KEY in ${path.basename(envPath)}`);
 
-					// Create encrypted blob using Laravel's own command
-					const encSpin = ora('Encrypting .env via php artisan env:encrypt…').start();
+                                        const encSpin = ora('Encrypting .env via php artisan env:encrypt…').start();
 					try {
 						artisan.run(['env:encrypt', `--key=${envKeyB64}`]);
 						encSpin.succeed('Encrypted .env created via Artisan.');

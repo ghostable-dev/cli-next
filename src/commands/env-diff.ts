@@ -19,12 +19,12 @@ import { readEnvFileSafe, resolveEnvFile } from '../support/env-files.js';
 import type { EnvironmentSecretBundle } from '@/domain';
 
 type DiffOptions = {
-	token?: string;
-	env?: string;
-	file?: string; // optional override; else .env.<env> or .env
-	only?: string[]; // optional; diff just these keys
-	includeMeta?: boolean;
-	showIgnored?: boolean;
+        token?: string;
+        env?: string;
+        file?: string;
+        only?: string[];
+        includeMeta?: boolean;
+        showIgnored?: boolean;
 };
 
 export function registerEnvDiffCommand(program: Command) {
@@ -37,9 +37,8 @@ export function registerEnvDiffCommand(program: Command) {
 		.option('--only <KEY...>', 'Only diff these keys')
 		.option('--include-meta', 'Include meta flags in bundle', false)
 		.option('--show-ignored', 'Display ignored keys', false)
-		.action(async (opts: DiffOptions) => {
-			// 1) Resolve project + environment from manifest
-			let projectId: string, projectName: string, envNames: string[];
+                .action(async (opts: DiffOptions) => {
+                        let projectId: string, projectName: string, envNames: string[];
 			try {
 				projectId = Manifest.id();
 				projectName = Manifest.name();
@@ -62,8 +61,7 @@ export function registerEnvDiffCommand(program: Command) {
 				});
 			}
 
-			// 2) Resolve token
-			let token = opts.token || process.env.GHOSTABLE_TOKEN || '';
+                        let token = opts.token || process.env.GHOSTABLE_TOKEN || '';
 			if (!token) {
 				const sessionSvc = new SessionService();
 				const sess = await sessionSvc.load();
@@ -76,8 +74,7 @@ export function registerEnvDiffCommand(program: Command) {
 				token = sess.accessToken;
 			}
 
-			// 3) Pull encrypted bundle from Ghostable
-			const client = GhostableClient.unauthenticated(config.apiBase).withToken(token);
+                        const client = GhostableClient.unauthenticated(config.apiBase).withToken(token);
 			let bundle: EnvironmentSecretBundle;
 			try {
 				bundle = await client.pull(projectId, envName!, {
@@ -91,13 +88,11 @@ export function registerEnvDiffCommand(program: Command) {
 				return;
 			}
 
-			// 4) Decrypt remote vars locally (ZK)
-			await initSodium();
+                        await initSodium();
 			const { secrets, warnings } = await decryptBundle(bundle);
 			for (const w of warnings) log.warn(`⚠️ ${w}`);
 
-			// Remote map (name -> { value, commented? })
-			const remoteMap: Record<string, { value: string; commented: boolean }> = {};
+                        const remoteMap: Record<string, { value: string; commented: boolean }> = {};
 			for (const s of secrets) {
 				remoteMap[s.entry.name] = {
 					value: s.value,
@@ -105,18 +100,15 @@ export function registerEnvDiffCommand(program: Command) {
 				};
 			}
 
-			// 5) Load local .env for this env (or explicit path)
-			const workDir = resolveWorkDir();
-			const envPath = resolveEnvFile(envName!, opts.file, /* mustExist */ false);
+                        const workDir = resolveWorkDir();
+                        const envPath = resolveEnvFile(envName!, opts.file, false);
 			const localVars = readEnvFileSafe(envPath);
-			// Local map assumes “not commented” for keys present in file; commented state is unknown locally.
-			const localMap: Record<string, { value: string; commented: boolean }> = {};
+                        const localMap: Record<string, { value: string; commented: boolean }> = {};
 			for (const [k, v] of Object.entries(localVars)) {
 				localMap[k] = { value: v, commented: false };
 			}
 
-			// 6) Apply ignore list (unless overridden by --only)
-			const ignored = getIgnoredKeys(envName);
+                        const ignored = getIgnoredKeys(envName);
 			const localFiltered = filterIgnoredKeys(localMap, ignored, opts.only);
 			const remoteFiltered = filterIgnoredKeys(remoteMap, ignored, opts.only);
 			const ignoredKeysUsed =
@@ -131,17 +123,14 @@ export function registerEnvDiffCommand(program: Command) {
 				log.info(message);
 			}
 
-			// 7) Optionally restrict to `only`
-			const restrict = (keys: string[]) =>
-				opts.only && opts.only.length ? keys.filter((k) => opts.only!.includes(k)) : keys;
+                        const restrict = (keys: string[]) =>
+                                opts.only && opts.only.length ? keys.filter((k) => opts.only!.includes(k)) : keys;
 
-			// 8) Compute diff
-			const added: string[] = [];
-			const updated: string[] = [];
-			const removed: string[] = [];
+                        const added: string[] = [];
+                        const updated: string[] = [];
+                        const removed: string[] = [];
 
-			// added/updated (present locally)
-			for (const key of restrict(Object.keys(localFiltered))) {
+                        for (const key of restrict(Object.keys(localFiltered))) {
 				if (!(key in remoteFiltered)) {
 					added.push(key);
 				} else {
@@ -155,17 +144,15 @@ export function registerEnvDiffCommand(program: Command) {
 				}
 			}
 
-			// removed (present remotely, not locally)
-			for (const key of restrict(Object.keys(remoteFiltered))) {
-				if (!(key in localFiltered)) {
-					removed.push(key);
-				}
-			}
+                        for (const key of restrict(Object.keys(remoteFiltered))) {
+                                if (!(key in localFiltered)) {
+                                        removed.push(key);
+                                }
+                        }
 
-			// 9) Render
-			if (!added.length && !updated.length && !removed.length) {
-				log.info('No differences detected.');
-				return;
+                        if (!added.length && !updated.length && !removed.length) {
+                                log.info('No differences detected.');
+                                return;
 			}
 
 			log.info(chalk.bold(`Diff for ${projectName}:${envName}`));
@@ -197,7 +184,7 @@ export function registerEnvDiffCommand(program: Command) {
 				}
 			}
 
-			console.log(''); // trailing newline
+                        console.log('');
 			log.ok(`Done. Compared local ${path.relative(workDir, envPath)} against Ghostable.`);
 		});
 }

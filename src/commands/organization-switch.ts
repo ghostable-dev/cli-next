@@ -31,8 +31,7 @@ export function registerOrganizationSwitchCommand(program: Command) {
 				process.exit(1);
 			}
 
-			// Resolve target organization
-			let targetId = opts.id as string | undefined;
+                        let targetId = opts.id as string | undefined;
 			if (targetId) {
 				const match = orgs.find((o) => o.id === targetId);
 				if (!match) {
@@ -49,10 +48,9 @@ export function registerOrganizationSwitchCommand(program: Command) {
 				});
 			}
 
-			// Save selection into session
-			await sessionSvc.save({
-				accessToken: sess.accessToken,
-				organizationId: targetId,
+                        await sessionSvc.save({
+                                accessToken: sess.accessToken,
+                                organizationId: targetId,
 				expiresAt: sess.expiresAt,
 			});
 

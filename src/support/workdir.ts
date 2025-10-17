@@ -35,10 +35,9 @@ export function resolveWorkDir(): string {
 			if (stat.isDirectory()) {
 				return resolved;
 			}
-		} catch {
-			// Ignore invalid paths – keep checking other candidates.
-		}
-	}
+                } catch {
+                }
+        }
 
 	return fallback;
 }

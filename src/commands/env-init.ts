@@ -20,8 +20,7 @@ export function registerEnvInitCommand(program: Command) {
 		)
 		.option('--name <NAME>', 'Environment name (slug)')
 		.action(async (opts: { name?: string }) => {
-			// 1) Ensure session and project context
-			const sessionSvc = new SessionService();
+                        const sessionSvc = new SessionService();
 			const sess = await sessionSvc.load();
 			if (!sess?.accessToken) {
 				log.error('❌ Not authenticated. Run `ghostable login`.');
@@ -41,8 +40,7 @@ export function registerEnvInitCommand(program: Command) {
 				sess.accessToken,
 			);
 
-			// 2) Fetch environment types (DOMAIN: EnvironmentType[])
-			const typesSpinner = ora('Loading environment types…').start();
+                        const typesSpinner = ora('Loading environment types…').start();
 			let typeOptions: EnvironmentType[] = [];
 			try {
 				typeOptions = await client.getEnvironmentTypes();
@@ -59,8 +57,7 @@ export function registerEnvInitCommand(program: Command) {
 				pageSize: Math.min(12, typeOptions.length || 1),
 			});
 
-			// 3) Fetch project environments and choose base (DOMAIN: Environment[])
-			const envSpinner = ora('Loading existing environments…').start();
+                        const envSpinner = ora('Loading existing environments…').start();
 			let existingEnvs: Environment[] = [];
 			try {
 				existingEnvs = await client.getEnvironments(projectId);
@@ -82,8 +79,7 @@ export function registerEnvInitCommand(program: Command) {
 				pageSize: Math.min(12, baseChoices.length || 1),
 			});
 
-			// 4) Name (option > suggestions > custom)
-			let name: string | undefined = opts.name;
+                        let name: string | undefined = opts.name;
 			if (!name) {
 				const suggestSpinner = ora('Fetching suggested environment names…').start();
 				let suggestions: EnvironmentSuggestedName[] = [];
@@ -126,19 +122,17 @@ export function registerEnvInitCommand(program: Command) {
 				}
 			}
 
-			// 5) Create the environment (DOMAIN: Environment)
-			const createSpinner = ora(`Creating environment "${name}"…`).start();
+                        const createSpinner = ora(`Creating environment "${name}"…`).start();
 			try {
 				const env = await client.createEnvironment({
 					projectId,
 					name: name!,
 					type: selectedType,
-					baseId: selectedBase, // may be null
+                                        baseId: selectedBase,
 				});
 				createSpinner.succeed(`Environment "${env.name}" created.`);
 
-				// 6) Update manifest locally
-				const manifestEnvs =
+                                const manifestEnvs =
 					env && existingEnvs
 						? [...existingEnvs, env].map((e: Environment) => ({
 								name: e.name,

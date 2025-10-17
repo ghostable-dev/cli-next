@@ -22,14 +22,13 @@ import { buildSecretPayload } from '../support/secret-payload.js';
 
 import type { SignedEnvironmentSecretUploadRequest, ValidatorRecord } from '@/types';
 
-// Listr context (extend as needed)
 type Ctx = Record<string, unknown>;
 
 export type PushOptions = {
 	api?: string;
 	token?: string;
-	file?: string; // optional override; else .env.<env> or .env
-	env?: string; // optional; prompt if missing
+        file?: string;
+        env?: string;
 	assumeYes?: boolean;
 	sync?: boolean;
 	replace?: boolean;
@@ -63,8 +62,7 @@ export function registerEnvPushCommand(program: Command) {
 }
 
 export async function runEnvPush(opts: PushOptions): Promise<void> {
-	// 1) Load manifest
-	let projectId: string, projectName: string, manifestEnvs: string[];
+        let projectId: string, projectName: string, manifestEnvs: string[];
 	try {
 		projectId = Manifest.id();
 		projectName = Manifest.name();
@@ -79,8 +77,7 @@ export async function runEnvPush(opts: PushOptions): Promise<void> {
 		process.exit(1);
 	}
 
-	// 2) Pick env (flag → prompt)
-	let envName = opts.env;
+        let envName = opts.env;
 	if (!envName) {
 		envName = await select({
 			message: 'Which environment would you like to push?',
@@ -88,8 +85,7 @@ export async function runEnvPush(opts: PushOptions): Promise<void> {
 		});
 	}
 
-	// 3) Resolve token / org
-	const sessionSvc = new SessionService();
+        const sessionSvc = new SessionService();
 	const sess = await sessionSvc.load();
 	if (!sess?.accessToken) {
 		log.error('❌ No API token. Run `ghostable login`.');
@@ -98,15 +94,13 @@ export async function runEnvPush(opts: PushOptions): Promise<void> {
 	const token = sess.accessToken;
 	const orgId = sess.organizationId;
 
-	// 4) Resolve .env file path
-	const filePath = resolveEnvFile(envName!, opts.file, true);
+        const filePath = resolveEnvFile(envName!, opts.file, true);
 	if (!fs.existsSync(filePath)) {
 		log.error(`❌ .env file not found at ${filePath}`);
 		process.exit(1);
 	}
 
-	// 5) Read variables + apply ignore list
-	const { vars: envMap, snapshots } = readEnvFileSafeWithMetadata(filePath);
+        const { vars: envMap, snapshots } = readEnvFileSafeWithMetadata(filePath);
 	const ignored = getIgnoredKeys(envName);
 	const filteredVars = filterIgnoredKeys(envMap, ignored);
 	const sync = Boolean(opts.sync || opts.replace || opts.pruneServer);
@@ -129,16 +123,14 @@ export async function runEnvPush(opts: PushOptions): Promise<void> {
 		);
 	}
 
-	// 6) Prep crypto + client
-	await initSodium();
+        await initSodium();
 	const keyBundle = await loadOrCreateKeys();
 	const masterSeed = Buffer.from(keyBundle.masterSeedB64.replace(/^b64:/, ''), 'base64');
 	const edPriv = Buffer.from(keyBundle.ed25519PrivB64.replace(/^b64:/, ''), 'base64');
 
 	const client = GhostableClient.unauthenticated(config.apiBase).withToken(token);
 
-	// 7) Encrypt & upload via Listr
-	const payloads: SignedEnvironmentSecretUploadRequest[] = [];
+        const payloads: SignedEnvironmentSecretUploadRequest[] = [];
 
 	const tasks = new Listr<Ctx, ListrDefaultRenderer, ListrSimpleRenderer>(
 		[
@@ -160,9 +152,9 @@ export async function runEnvPush(opts: PushOptions): Promise<void> {
 
 					const payload = await buildSecretPayload({
 						name,
-						env: envName!, // from manifest selection
-						org: orgId ?? '', // server may infer if token is org-scoped
-						project: projectId, // from manifest
+                                                env: envName!,
+                                                org: orgId ?? '',
+                                                project: projectId,
 						plaintext,
 						masterSeed,
 						edPriv,

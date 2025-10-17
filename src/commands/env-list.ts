@@ -12,16 +12,14 @@ export function registerEnvListCommand(program: Command) {
 		.alias('environments:list')
 		.description('List the environments in the current project (from ghostable.yml).')
 		.action(async () => {
-			// 1) Ensure session
-			const sessionSvc = new SessionService();
+                        const sessionSvc = new SessionService();
 			const sess = await sessionSvc.load();
 			if (!sess?.accessToken) {
 				log.error('❌ Not authenticated. Run `ghostable login`.');
 				process.exit(1);
 			}
 
-			// 2) Resolve project from manifest
-			let projectId: string;
+                        let projectId: string;
 			let projectName: string;
 			try {
 				projectId = Manifest.id();
@@ -32,10 +30,9 @@ export function registerEnvListCommand(program: Command) {
 				return;
 			}
 
-			// 3) Fetch environments (domain objects)
-			const client = GhostableClient.unauthenticated(config.apiBase).withToken(
-				sess.accessToken,
-			);
+                        const client = GhostableClient.unauthenticated(config.apiBase).withToken(
+                                sess.accessToken,
+                        );
 			let envs: Environment[] = [];
 			try {
 				envs = await client.getEnvironments(projectId);
@@ -54,18 +51,16 @@ export function registerEnvListCommand(program: Command) {
 				return;
 			}
 
-			// 4) Build display rows
-			const rows = envs.map((e) => ({
+                        const rows = envs.map((e) => ({
 				ID: e.id,
 				Name: e.name,
 				Type: e.type,
 				Base: e.baseId ?? '',
 			}));
 
-			// 5) Print without index column: key by env name
-			const keyed = Object.fromEntries(
-				rows.map((r) => [r.Name || r.ID, { ID: r.ID, Type: r.Type, Base: r.Base }]),
-			);
+                        const keyed = Object.fromEntries(
+                                rows.map((r) => [r.Name || r.ID, { ID: r.ID, Type: r.Type, Base: r.Base }]),
+                        );
 			console.table(keyed);
 		});
 }

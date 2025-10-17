@@ -39,8 +39,7 @@ export function registerDeployVaporCommand(program: Command) {
 				process.exit(1);
 			}
 
-			// 1) Token + client
-			let token: string;
+                        let token: string;
 			try {
 				token = await resolveToken(opts.token, { allowSession: false });
 			} catch (error) {
@@ -49,8 +48,7 @@ export function registerDeployVaporCommand(program: Command) {
 			}
 			const client = createGhostableClient(token);
 
-			// 2) Fetch secret bundle for this env (derived from token)
-			const deploySpin = ora('Fetching environment secret bundle…').start();
+                        const deploySpin = ora('Fetching environment secret bundle…').start();
 			let bundle: EnvironmentSecretBundle;
 			try {
 				bundle = await client.deploy({
@@ -70,8 +68,7 @@ export function registerDeployVaporCommand(program: Command) {
 				return;
 			}
 
-			// 3) Decrypt and split into standard vs secret (Vapor)
-			const { secrets, warnings } = await decryptBundle(bundle, { masterSeedB64 });
+                        const { secrets, warnings } = await decryptBundle(bundle, { masterSeedB64 });
 			for (const w of warnings) log.warn(`⚠️ ${w}`);
 
 			if (!secrets.length) {
@@ -209,9 +206,8 @@ function createSecretTempFile(value: string): Promise<string> {
 }
 
 function safeUnlink(filePath: string): void {
-	try {
-		if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-	} catch {
-		// ignore unlink failures
-	}
+        try {
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        } catch {
+        }
 }

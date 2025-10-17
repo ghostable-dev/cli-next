@@ -20,8 +20,7 @@ export function registerOrganizationListCommand(program: Command) {
 		.action(async () => {
 			const apiBase = config.apiBase;
 
-			// Ensure we have a session & org
-			const sessions = new SessionService();
+                        const sessions = new SessionService();
 			const sess = await sessions.load();
 			if (!sess?.accessToken) {
 				log.error('❌ Not authenticated. Run `ghostable login` first.');
@@ -36,8 +35,7 @@ export function registerOrganizationListCommand(program: Command) {
 
 			const client = GhostableClient.unauthenticated(apiBase).withToken(sess.accessToken);
 
-			// Fetch projects (domain)
-			const spinner = ora('Loading projects…').start();
+                        const spinner = ora('Loading projects…').start();
 			let projects: Project[] = [];
 			try {
 				projects = await client.projects(sess.organizationId);
@@ -50,8 +48,7 @@ export function registerOrganizationListCommand(program: Command) {
 				process.exit(1);
 			}
 
-			// Build project choices
-			const choices = [
+                        const choices = [
 				{ name: '[Create a new project]', value: '__new__' },
 				...projects.map((p) => ({ name: p.name || p.id, value: p.id })),
 			];
@@ -92,8 +89,7 @@ export function registerOrganizationListCommand(program: Command) {
 				}
 			}
 
-			// Write manifest
-			try {
+                        try {
 				const manifestEnvs =
 					project.environments?.map((env: { name: string; type: string }) => ({
 						name: env.name,

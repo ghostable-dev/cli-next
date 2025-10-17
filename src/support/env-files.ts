@@ -121,25 +121,21 @@ export function buildPreservedSnapshot(
 export function resolveEnvFile(envName?: string, explicitPath?: string, mustExist = false): string {
 	const workDir = resolveWorkDir();
 
-	// 1) explicit path wins (relative to workDir)
-	if (explicitPath) {
-		const p = path.resolve(workDir, explicitPath);
-		if (fs.existsSync(p)) return p;
-		if (mustExist) {
-			throw new Error(`.env file not found at explicit path: ${p}`);
-		}
-		// fall through to candidates if not required to exist
-	}
+        if (explicitPath) {
+                const p = path.resolve(workDir, explicitPath);
+                if (fs.existsSync(p)) return p;
+                if (mustExist) {
+                        throw new Error(`.env file not found at explicit path: ${p}`);
+                }
+        }
 
-	// 2) .env.<envName>
-	if (envName) {
-		const byEnv = path.resolve(workDir, `.env.${envName}`);
-		if (fs.existsSync(byEnv)) return byEnv;
-	}
+        if (envName) {
+                const byEnv = path.resolve(workDir, `.env.${envName}`);
+                if (fs.existsSync(byEnv)) return byEnv;
+        }
 
-	// 3) default .env
-	const fallback = path.resolve(workDir, '.env');
-	if (fs.existsSync(fallback)) return fallback;
+        const fallback = path.resolve(workDir, '.env');
+        if (fs.existsSync(fallback)) return fallback;
 
 	if (mustExist) {
 		const tried = [
@@ -152,6 +148,5 @@ export function resolveEnvFile(envName?: string, explicitPath?: string, mustExis
 		throw new Error(`.env file not found. Tried: ${tried}`);
 	}
 
-	// If nothing exists and not required, return the default location so callers can create it.
-	return fallback;
+        return fallback;
 }

@@ -18,15 +18,15 @@ import { readEnvFileSafeWithMetadata } from '../support/env-files.js';
 import type { EnvironmentSecret, EnvironmentSecretBundle } from '@/domain';
 
 type PullOptions = {
-	token?: string;
-	env?: string;
-	file?: string; // output path; default .env.<env> or .env
-	only?: string[]; // repeatable: --only KEY --only OTHER
-	includeMeta?: boolean;
-	dryRun?: boolean; // don't write file; just show summary
-	showIgnored?: boolean;
-	replace?: boolean;
-	pruneLocal?: boolean;
+        token?: string;
+        env?: string;
+        file?: string;
+        only?: string[];
+        includeMeta?: boolean;
+        dryRun?: boolean;
+        showIgnored?: boolean;
+        replace?: boolean;
+        pruneLocal?: boolean;
 	noBackup?: boolean;
 	backup?: boolean;
 };
@@ -57,9 +57,8 @@ export function registerEnvPullCommand(program: Command) {
 		.option('--replace', 'Replace local file instead of merging', false)
 		.option('--prune-local', 'Alias for --replace', false)
 		.option('--no-backup', 'Do not create a backup before writing')
-		.action(async (opts: PullOptions) => {
-			// 1) Load manifest (project + envs)
-			let projectId: string, projectName: string, envNames: string[];
+                .action(async (opts: PullOptions) => {
+                        let projectId: string, projectName: string, envNames: string[];
 			try {
 				projectId = Manifest.id();
 				projectName = Manifest.name();
@@ -74,8 +73,7 @@ export function registerEnvPullCommand(program: Command) {
 				process.exit(1);
 			}
 
-			// 2) Pick env (flag → prompt)
-			let envName = opts.env?.trim();
+                        let envName = opts.env?.trim();
 			if (!envName) {
 				envName = await select<string>({
 					message: 'Which environment would you like to pull?',
@@ -83,8 +81,7 @@ export function registerEnvPullCommand(program: Command) {
 				});
 			}
 
-			// 3) Resolve token (org context only affects server-side; decrypt uses AAD)
-			let token = opts.token || process.env.GHOSTABLE_TOKEN || '';
+                        let token = opts.token || process.env.GHOSTABLE_TOKEN || '';
 			if (!token) {
 				const sessionSvc = new SessionService();
 				const sess = await sessionSvc.load();
@@ -97,8 +94,7 @@ export function registerEnvPullCommand(program: Command) {
 				token = sess.accessToken;
 			}
 
-			// 4) Fetch secret bundle
-			const client = GhostableClient.unauthenticated(config.apiBase).withToken(token);
+                        const client = GhostableClient.unauthenticated(config.apiBase).withToken(token);
 			let bundle: EnvironmentSecretBundle;
 			try {
 				bundle = await client.pull(projectId, envName!, {
@@ -117,13 +113,11 @@ export function registerEnvPullCommand(program: Command) {
 				return;
 			}
 
-			// 5) Prepare crypto
-			await initSodium(); // no-op with stablelib; safe to keep
+                        await initSodium();
 			const keyBundle = await loadOrCreateKeys();
 			const masterSeed = Buffer.from(keyBundle.masterSeedB64.replace(/^b64:/, ''), 'base64');
 
-			// 6) Decrypt layer-by-layer and merge (parent → … → child; child wins)
-			const chainOrder: readonly string[] = bundle.chain;
+                        const chainOrder: readonly string[] = bundle.chain;
 			const byEnv = new Map<string, EnvironmentSecret[]>();
 			for (const entry of bundle.secrets) {
 				if (!byEnv.has(entry.env)) byEnv.set(entry.env, []);
@@ -136,9 +130,8 @@ export function registerEnvPullCommand(program: Command) {
 			for (const layer of chainOrder) {
 				const entries: EnvironmentSecret[] = byEnv.get(layer) || [];
 				for (const entry of entries) {
-					// Derive key from AAD (org/project/env as used at push time)
-					const scope = scopeFromAAD(entry.aad);
-					const { encKey } = deriveKeys(masterSeed, scope);
+                                        const scope = scopeFromAAD(entry.aad);
+                                        const { encKey } = deriveKeys(masterSeed, scope);
 
 					try {
 						const plaintext = aeadDecrypt(encKey, {
@@ -149,11 +142,9 @@ export function registerEnvPullCommand(program: Command) {
 						});
 						const value = new TextDecoder().decode(plaintext);
 
-						// Apply merge (child overrides parent)
-						merged[entry.name] = value;
+                                                merged[entry.name] = value;
 
-						// Track comment flag if meta is included
-						commentFlags[entry.name] = Boolean(entry.meta?.is_commented);
+                                                commentFlags[entry.name] = Boolean(entry.meta?.is_commented);
 					} catch {
 						log.warn(`⚠️ Could not decrypt ${entry.name}; skipping`);
 					}
@@ -173,8 +164,7 @@ export function registerEnvPullCommand(program: Command) {
 				log.info(message);
 			}
 
-			// 7) Render dotenv
-			const outputPath = resolveOutputPath(envName!, opts.file);
+                        const outputPath = resolveOutputPath(envName!, opts.file);
 			const { vars: existingVars, snapshots } = readEnvFileSafeWithMetadata(outputPath);
 
 			const replace = Boolean(opts.replace || opts.pruneLocal);

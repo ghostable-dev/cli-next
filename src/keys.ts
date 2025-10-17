@@ -1,13 +1,13 @@
 import { randomBytes, b64 } from './crypto.js';
 import { loadKeytar } from './support/keyring.js';
 
-const SERVICE = 'ghostable-cli'; // keep in sync everywhere
+const SERVICE = 'ghostable-cli';
 const DEFAULT_PROFILE = 'default';
 
 export type KeyBundle = {
-	masterSeedB64: string; // "b64:..." or "base64:..."
-	ed25519PrivB64: string; // "b64:..."
-	ed25519PubB64: string; // "b64:..."
+        masterSeedB64: string;
+        ed25519PrivB64: string;
+        ed25519PubB64: string;
 };
 
 function ub64Prefixed(s: string): Uint8Array {
@@ -69,12 +69,7 @@ export async function setMasterSeed(seedB64: string, profile = DEFAULT_PROFILE):
 			? seedB64.replace(/^base64:/, 'b64:')
 			: `b64:${seedB64}`;
 
-	const seedBytes = ub64Prefixed(normalized);
-	if (seedBytes.length !== 32) {
-		// optional: throw new Error('Master seed must decode to 32 bytes.');
-	}
-
-	const bundle = await loadOrCreateKeys(profile);
+        const bundle = await loadOrCreateKeys(profile);
 	const updated: KeyBundle = { ...bundle, masterSeedB64: normalized };
 	await saveKeys(updated, profile);
 }

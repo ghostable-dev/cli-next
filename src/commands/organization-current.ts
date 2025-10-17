@@ -10,8 +10,7 @@ export function registerOrganizationCurrentCommand(program: Command) {
 		.aliases(['orgs:current', 'organizations:current', 'organization:current', 'current'])
 		.description('Show your current organization context.')
 		.action(async () => {
-			// 1. Load session / access token
-			const sessionSvc = new SessionService();
+                        const sessionSvc = new SessionService();
 			const sess = await sessionSvc.load();
 			if (!sess?.accessToken) {
 				log.error('❌ Not authenticated. Run `ghostable login`.');
@@ -24,16 +23,14 @@ export function registerOrganizationCurrentCommand(program: Command) {
 				process.exit(1);
 			}
 
-			// 2. Fetch organizations
-			const client = GhostableClient.unauthenticated(config.apiBase).withToken(
-				sess.accessToken,
-			);
+                        const client = GhostableClient.unauthenticated(config.apiBase).withToken(
+                                sess.accessToken,
+                        );
 			const orgs = await client.organizations();
 			const org = orgs.find((o) => o.id === currentOrgId);
 
-			// 3. Display result
-			if (!org) {
-				log.error('❌ Unable to determine current organization (not found in API list).');
+                        if (!org) {
+                                log.error('❌ Unable to determine current organization (not found in API list).');
 				process.exit(1);
 			}
 

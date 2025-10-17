@@ -25,8 +25,7 @@ export function registerLoginCommand(program: Command) {
 			const spinner = ora('Authenticating…').start();
 			try {
 				let token = await client.login(email, pwd);
-				// 2FA
-				const twofaClient = GhostableClient.unauthenticated(apiBase);
+                                const twofaClient = GhostableClient.unauthenticated(apiBase);
 				if (!token) {
 					spinner.stop();
 					const code = await password({ message: '2FA code:' });

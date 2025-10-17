@@ -20,9 +20,9 @@ import { resolveWorkDir } from '../support/workdir.js';
 import type { EnvironmentSecretBundle } from '@/domain';
 
 type EnvDeployOptions = {
-	token?: string;
-	file?: string; // default: .env
-	only?: string[]; // limit to specific keys
+        token?: string;
+        file?: string;
+        only?: string[];
 };
 
 export function registerEnvDeployCommand(program: Command) {
@@ -41,8 +41,7 @@ export function registerEnvDeployCommand(program: Command) {
 				process.exit(1);
 			}
 
-			// 1) Token + client
-			let token: string;
+                        let token: string;
 			try {
 				token = await resolveToken(opts.token, { allowSession: false });
 			} catch (error) {
@@ -51,8 +50,7 @@ export function registerEnvDeployCommand(program: Command) {
 			}
 			const client = createGhostableClient(token);
 
-			// 2) Fetch bundle (environment is implied by the CI token context)
-			const spin = ora('Fetching environment secret bundle…').start();
+                        const spin = ora('Fetching environment secret bundle…').start();
 			let bundle: EnvironmentSecretBundle;
 			try {
 				bundle = await client.deploy({
@@ -72,15 +70,13 @@ export function registerEnvDeployCommand(program: Command) {
 				return;
 			}
 
-			// 3) Decrypt and merge (child wins if multiple layers are ever present)
-			const { secrets, warnings } = await decryptBundle(bundle, { masterSeedB64 });
+                        const { secrets, warnings } = await decryptBundle(bundle, { masterSeedB64 });
 			for (const w of warnings) log.warn(`⚠️ ${w}`);
 
 			const merged: Record<string, string> = {};
 			for (const s of secrets) merged[s.entry.name] = s.value;
 
-			// 4) Write .env (default) or a custom path
-			const workDir = resolveWorkDir();
+                        const workDir = resolveWorkDir();
 			const outPath = path.resolve(workDir, opts.file ?? '.env');
 			const previousMeta = readEnvFileSafeWithMetadata(outPath);
 			const previous = previousMeta.vars;

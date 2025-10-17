@@ -9,13 +9,11 @@ import { randomBytes as nobleRandom } from '@noble/hashes/utils';
 import { CIPHER_ALG } from '@/types';
 import type { AAD, CipherBundle } from '@/types';
 
-// wire noble/ed25519 helpers once
 ed.etc.sha512Sync = (m: Uint8Array) => sha512(m);
 ed.etc.randomBytes = nobleRandom;
 
-// no-op with stablelib (kept for API parity)
 export async function initSodium() {
-	return;
+        return;
 }
 
 export function randomBytes(n = 32): Uint8Array {
@@ -63,7 +61,7 @@ export function aeadEncrypt(key: Uint8Array, plaintext: Uint8Array, aad: AAD): C
 /** Decrypt (fails if key/nonce/AAD mismatch). */
 export function aeadDecrypt(key: Uint8Array, bundle: CipherBundle): Uint8Array {
 	const aead = new XChaCha20Poly1305(key);
-	const ad = aadBytes(bundle.aad); // canonical order
+        const ad = aadBytes(bundle.aad);
 	const nonce = ub64(bundle.nonce);
 	const ct = ub64(bundle.ciphertext);
 	const pt = aead.open(nonce, ct, ad);
